@@ -1,7 +1,10 @@
 package org.eatabrick.pooplinks;
 
-import android.app.IntentService;
+import android.app.Activity;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.widget.Toast;
 import android.util.Log;
 
@@ -21,14 +24,14 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.message.BasicNameValuePair;
 
-public class PostService extends IntentService {
-  public PostService() {
-    super("PostService");
-  }
+public class PostLink extends Activity {
+  @Override public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
-  @Override protected void onHandleIntent(Intent intent) {
-    String uri  = intent.getStringExtra("org.eatabrick.pooplinks.link");
-    String user = intent.getStringExtra("org.eatabrick.pooplinks.name");
+    SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+
+    String uri = getIntent().getExtras().getString(Intent.EXTRA_TEXT);
+    String user = settings.getString("name", "Some Asshole");
     String message;
 
     try {
@@ -44,12 +47,10 @@ public class PostService extends IntentService {
 
       String response = client.execute(request, new BasicResponseHandler());
 
-      Log.i("PoopLinks", "Result: " + response);
-
       if (response.contains("error")) {
-        message = response.substring(10, response.length() - 1);
+        message = "Error: " + response.substring(10, response.length() - 2);
       } else {
-        message = response.substring(11, response.length() - 1);
+        message = response.substring(11, response.length() - 2);
       }
     } catch (UnsupportedEncodingException e) {
       Log.w("PoopLinks", "Unsupported encoding");
@@ -59,6 +60,8 @@ public class PostService extends IntentService {
       message = "I/O exception";
     }
 
-    Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+
+    finish();
   }
 }

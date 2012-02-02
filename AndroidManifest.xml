@@ -4,12 +4,15 @@
   android:versionCode="1"
   android:versionName="1.0" >
   <uses-permission android:name="android.permission.INTERNET"></uses-permission>
+  <uses-sdk android:minSdkVersion="4" />
   <application android:label="@string/app_name" android:icon="@drawable/icon">
     <activity android:name=".PoopLinks" android:label="@string/app_name">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
+    </activity>
+    <activity android:name=".PostLink" android:theme="@style/Invisible">
       <intent-filter>
         <action android:name="android.intent.action.SEND" />
         <category android:name="android.intent.category.DEFAULT" />
@@ -17,6 +20,6 @@
       </intent-filter>
     </activity>
     <activity android:name=".Preferences"></activity>
-    <service android:name=".PostService"></service>
+    <activity android:name=".History"></activity>
   </application>
 </manifest> 

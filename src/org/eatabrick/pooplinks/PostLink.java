@@ -1,6 +1,7 @@
 package org.eatabrick.pooplinks;
 
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.content.Intent;
@@ -25,6 +26,47 @@ import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.message.BasicNameValuePair;
 
 public class PostLink extends Activity {
+  private class PostLinkTask extends AsyncTask<String, Integer, String> {
+    protected String doInBackground(String... params) {
+      String uri = params[0];
+      String user = params[1];
+
+      try {
+        List<NameValuePair> data = new ArrayList<NameValuePair>();
+        data.add(new BasicNameValuePair("uri", uri));
+        data.add(new BasicNameValuePair("user", user));
+
+        UrlEncodedFormEntity body = new UrlEncodedFormEntity(data, "UTF-8");
+
+        HttpClient client = new DefaultHttpClient();
+        HttpPost request = new HttpPost("http://eab.so/");
+        request.setEntity(body);
+
+        String response = client.execute(request, new BasicResponseHandler());
+
+        if (response.contains("error")) {
+          return "Error: " + response.substring(10, response.length() - 2);
+        } else {
+          return response.substring(11, response.length() - 2);
+        }
+      } catch (UnsupportedEncodingException e) {
+        Log.w("PoopLinks", "Unsupported encoding");
+        return "Unsupported encoding";
+      } catch (IOException e) {
+        Log.w("PoopLinks", "I/O exception");
+        return "I/O exception";
+      }
+    }
+
+    protected void onProgressUpdate(Integer... progress) {
+      // do nothing
+    }
+
+    protected void onPostExecute(String message) {
+      Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+    }
+  }
+
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
@@ -32,35 +74,8 @@ public class PostLink extends Activity {
 
     String uri = getIntent().getExtras().getString(Intent.EXTRA_TEXT);
     String user = settings.getString("name", "Some Asshole");
-    String message;
 
-    try {
-      List<NameValuePair> data = new ArrayList<NameValuePair>();
-      data.add(new BasicNameValuePair("uri", uri));
-      data.add(new BasicNameValuePair("user", user));
-
-      UrlEncodedFormEntity body = new UrlEncodedFormEntity(data, "UTF-8");
-
-      HttpClient client = new DefaultHttpClient();
-      HttpPost request = new HttpPost("http://eab.so/");
-      request.setEntity(body);
-
-      String response = client.execute(request, new BasicResponseHandler());
-
-      if (response.contains("error")) {
-        message = "Error: " + response.substring(10, response.length() - 2);
-      } else {
-        message = response.substring(11, response.length() - 2);
-      }
-    } catch (UnsupportedEncodingException e) {
-      Log.w("PoopLinks", "Unsupported encoding");
-      message = "Unsupported encoding";
-    } catch (IOException e) {
-      Log.w("PoopLinks", "I/O exception");
-      message = "I/O exception";
-    }
-
-    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+    new PostLinkTask().execute(uri, user);
 
     finish();
   }

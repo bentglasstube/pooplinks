@@ -4,8 +4,4 @@
     android:icon="@android:drawable/ic_menu_preferences"
     android:title="@string/settings" 
     android:showAsAction="always|withText" />
-  <item android:id="@+id/history"
-    android:icon="@android:drawable/ic_menu_recent_history"
-    android:title="@string/history" 
-    android:showAsAction="ifRoom|withText" />
 </menu>

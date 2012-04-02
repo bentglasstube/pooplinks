@@ -19,9 +19,12 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 import android.app.ListActivity;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.content.Intent;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -29,11 +32,49 @@ import android.net.Uri;
 
 public class History extends ListActivity {
   private List<Map<String, String>> links = new ArrayList<Map<String, String>>();
+  private SimpleAdapter adapter;
 
   @Override public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.history);
 
+    adapter = new SimpleAdapter(
+      this, 
+      links, 
+      android.R.layout.simple_list_item_2, 
+      new String[] {"title", "author"},
+      new int[] {android.R.id.text1, android.R.id.text2}
+    );
+
+    setContentView(R.layout.history);
+    setListAdapter(adapter);
+
+    new ReadRSSTask().execute();
+  }
+
+  @Override public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.main, menu);
+    return true;
+  }
+
+  @Override public boolean onOptionsItemSelected(MenuItem item) {
+    Intent intent = null;
+    switch (item.getItemId()) {
+      case R.id.settings:
+        intent = new Intent(this, Preferences.class);
+        startActivityForResult(intent, 0);
+        return true;
+      default:
+        return super.onOptionsItemSelected(item);
+    }
+  }
+
+  @Override public void onListItemClick(ListView parent, View v, int position, long id) {
+    Intent intent = new Intent(Intent.ACTION_VIEW);
+    intent.setData(Uri.parse(links.get(position).get("link")));
+    startActivity(intent);
+  }
+
+  private void readRSS() {
     try {
       URL feed = new URL("http://eab.so/rss");
       SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -53,21 +94,10 @@ public class History extends ListActivity {
     } catch (IOException e) {
       Log.w("PoopLinks", "I/O exception");
     }
-
-    SimpleAdapter adapter = new SimpleAdapter(
-      this, 
-      links, 
-      android.R.layout.simple_list_item_2, 
-      new String[] {"title", "author"},
-      new int[] {android.R.id.text1, android.R.id.text2}
-    );
-    setListAdapter(adapter);
   }
 
-  @Override public void onListItemClick(ListView parent, View v, int position, long id) {
-    Intent intent = new Intent(Intent.ACTION_VIEW);
-    intent.setData(Uri.parse(links.get(position).get("link")));
-    startActivity(intent);
+  private void displayRSS() {
+    adapter.notifyDataSetChanged();
   }
 
   private class RSSHandler extends DefaultHandler {
@@ -122,6 +152,17 @@ public class History extends ListActivity {
         default:
           break;
       }
+    }
+  }
+
+  private class ReadRSSTask extends AsyncTask<Void, Void, Void> {
+    protected Void doInBackground(Void... rubbish) {
+      readRSS();
+      return null;
+    }
+
+    protected void onPostExecute(Void result) {
+      displayRSS();
     }
   }
 }

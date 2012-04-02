@@ -59,6 +59,11 @@ public class History extends ListActivity {
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     Intent intent = null;
     switch (item.getItemId()) {
+      case R.id.refresh:
+        links.clear();
+        adapter.notifyDataSetChanged();
+        new ReadRSSTask().execute();
+        return true;
       case R.id.settings:
         intent = new Intent(this, Preferences.class);
         startActivityForResult(intent, 0);

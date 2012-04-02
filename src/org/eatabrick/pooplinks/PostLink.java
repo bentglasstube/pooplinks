@@ -45,16 +45,16 @@ public class PostLink extends Activity {
         String response = client.execute(request, new BasicResponseHandler());
 
         if (response.contains("error")) {
-          return "Error: " + response.substring(10, response.length() - 2);
+          return getString(R.string.error_from_site, response.substring(10, response.length() - 2));
         } else {
           return response.substring(11, response.length() - 2);
         }
       } catch (UnsupportedEncodingException e) {
         Log.w("PoopLinks", "Unsupported encoding");
-        return "Unsupported encoding";
+        return getString(R.string.error_unsupported_encoding);
       } catch (IOException e) {
         Log.w("PoopLinks", "I/O exception");
-        return "I/O exception";
+        return getString(R.string.error_io_exception);
       }
     }
 

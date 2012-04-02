@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="app_name">PoopLinks</string>
+  <string name="settings">Settings</string>
+  <string name="history">History</string>
+  <string name="empty">No links</string>
+  <string name="error_from_site">Error: %s</string>
+  <string name="error_unsupported_encoding">Error: Unsupported encoding</string>
+  <string name="error_io_exception">Error: I/O exception</string>
 </resources>
